@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "sorted-index.h"
+#include "index-tokenizer.h"
 
 int compareString(void *a,void *b)
 {
@@ -20,33 +21,13 @@ int main(int argc, char ** argv)
 {   
     printf("======Beginning Excution======\n");
     
-    SortedIndexPtr index = SICreate(compare,destroy);
-    printf("======Finished Creation======\n");
-
-    if(index == NULL)
+    FILE *fd = fopen("text.txt","r");
+    if(fd == NULL)
     {
-        printf("malloc fail...\n");
-        exit(EXIT_FAILURE);
+        printf("fd NULL\n");
     }
-
-    printf("1:\n");
-    SIInsert(index,"cat","text.txt");
-    printf("2:\n");
-    SIInsert(index,"dog","text.txt");
-    printf("3:\n");
-    SIInsert(index,"mouse","animals.txt");
-    printf("4:\n");
-    SIInsert(index,"mouse","animals.txt");
-    printf("5:\n");
-    SIInsert(index,"dog","animals.txt");
-    printf("6:\n");
-    SIInsert(index,"cat","animals.txt");
-    printf("7:\n");
-    SIInsert(index,"cat","text.txt");
-    printf("8:\n");
-    printf("======Finished Insertion=====\n");
-
-    SIPrintList(index);
-
+    TokenizerT *tk = TKCreate(fd);
+    printf("Attempting to print...\n");
+    printf("inputString: %s\n",tk->inputString);
     return 0;
 }

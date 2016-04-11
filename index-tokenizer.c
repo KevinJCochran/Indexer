@@ -6,33 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#define SIZE 21
-#define NAME 50
-//char size[9] = {'s','i','z','e','o','f','(',')'};
-//char operators[] = {'(',')','[',']','.','-','>','<','*','&','!','~','+','/','%','=','^','|',',','?',':'};
-char *allNames[NAME] = {"left parentheses","right parentheses","left bracket","right bracket",
-                    "dot operator","minus sign","greater than","less than","indirect sign",
-                    "address","negate","1's comp","plus sign","divide sign","modulus",
-                    "equals sign","bitwise exclusive or","bitwise or","comma",
-                    "condition symbol","true/false symbol","structure pointer","increment",
-                    "decrement","shift right","shift left","equals","not equals","logical AND",
-                    "logical OR","plus equals","minus equals","multiply equals","divide equals",
-                    "modulus equals","shift right equals","shift left equals","AND equals",
-                    "XOR equals","less or equal","greater or equal","OR equals",
-                    "hexadecimal","Octal","decimal","word","float","BAD TOKEN","sizeof()"};
+#include "index-tokenizer.h"
 
-/*
- * Tokenizer type.  You need to fill in the type as part of your implementation.
- */
-struct TokenizerT_ {
-
-    int   position;
-    int   tkType;
-    char *inputString;
-};
-
-typedef struct TokenizerT_ TokenizerT;
 /*
  *subString creates a new string from start to end and returns it as pointer.
  */
@@ -69,7 +44,7 @@ char *subString(char *str, int start, int end){
  * You need to fill in this function as part of your implementation.
  */
 
-TokenizerT *TKCreate( char * ts ) {
+TokenizerT *TKCreate( FILE * fd ) {
     
     TokenizerT *tk = (TokenizerT*) malloc(sizeof(TokenizerT));
 
@@ -80,10 +55,30 @@ TokenizerT *TKCreate( char * ts ) {
         return NULL;
     }
 
-    tk->inputString = ts;
     tk->position = 0;
-    tk->tkType = 0;
-    return tk;
+
+    int i = 1;
+    char c = '\0';
+    tk->inputString = (char*)malloc(i);
+    printf("Initialized...\n");
+    do{
+        printf("\nReading in char... \n");
+        c = (char)fgetc(fd);    
+        tk->inputString = (char*)realloc(tk->inputString,i);
+        printf("\nRealloced...%x...%c...\n",*(tk->inputString),c);
+        *(tk->inputString) = c;  
+        i++;
+        if(c == EOF)
+        {
+            printf("EOF\n");
+        }
+        else
+        {
+            printf("%s\n",c);
+        }
+    }while(c != EOF);
+    tk->inputString = (char*)realloc(tk->inputString,i+1);
+    *(tk->inputString+i) = '\0';
 }
 
 /*
@@ -172,79 +167,7 @@ char *TKGetNextToken( TokenizerT * tk ) {
         }
 
         tk->position = position;
-        tk->tkType = 45;
         return subString(inputStr,start,position-1);
     }
-
-   
- 
-     //any other character will be recognized as bad token 
-     //tk->tkType = 47;
-     //tk->position = position+1;
-     //return subString(inputStr,start, position);
-    
     return NULL;
-}
-
-/*
- * main will have a string argument (in argv[1]).
- * The string argument contains the tokens.
- * Print out the tokens in the second string in left-to-right order.
- * Each token should be printed on a separate line.
- */
-
-int main(int argc, char **argv) {
-
-
-    FILE* fp;
-   
-    fp = fopen("file.txt", "r");
-    
-    int i = 1;
-    char* c =(char*) malloc(i);
-    char * buffer = (char*)malloc(i);
-    *c = fgetc(fp);    
-    strcpy(buffer,c); 
-    while((*c=fgetc(fp)) != EOF)
-    {
-        
-        if(fp == NULL)
-        {
-            perror("Error opening file");
-            return -1;
-        }
-    
-        buffer = (char*)realloc(buffer,i+1);
-        strcat(buffer,c); 
-        i++; 
-    }
-    strcat(buffer,"\0");
-
-    TokenizerT *tk = TKCreate(buffer);
-    if(tk == NULL)
-    {
-        return -1;
-    }
-    char *token = TKGetNextToken(tk);
-   
-    
-    while(token != NULL) 
-    {
-        //if bad token, print Hex value. else print token regularly
-        if(tk->tkType == 47)
-        {
-            printf("%s:[0x%x]\n",allNames[tk->tkType],*(token+2));
-        }
-        else
-        {
-            printf("%s: %s\n",allNames[tk->tkType],token);
-        }
-        free(token);
-        token = TKGetNextToken(tk);
-    } 
-    TKDestroy(tk);   
-    fclose(fp);
-    free(c);
-    free(buffer);
-    return 0;
 }

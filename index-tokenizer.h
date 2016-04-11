@@ -9,13 +9,12 @@ typedef struct TokenizerT_ TokenizerT;
 struct TokenizerT_ {
 
     int position;
-    int tkType;
     char *inputString;
 };
 
 char *subString(char *str, int start, int end);
 
-Tokenizer *TkCreate(char *ts);
+TokenizerT *TKCreate(FILE * fd);
 
 void TKDestroy(TokenizerT *tk);
 
