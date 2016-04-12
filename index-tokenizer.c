@@ -56,29 +56,21 @@ TokenizerT *TKCreate( FILE * fd ) {
     }
 
     tk->position = 0;
-
     int i = 1;
-    char c = '\0';
-    tk->inputString = (char*)malloc(i);
-    printf("Initialized...\n");
-    do{
-        printf("\nReading in char... \n");
-        c = (char)fgetc(fd);    
-        tk->inputString = (char*)realloc(tk->inputString,i);
-        printf("\nRealloced...%x...%c...\n",*(tk->inputString),c);
-        *(tk->inputString) = c;  
-        i++;
-        if(c == EOF)
-        {
-            printf("EOF\n");
-        }
-        else
-        {
-            printf("%s\n",c);
-        }
-    }while(c != EOF);
-    tk->inputString = (char*)realloc(tk->inputString,i+1);
-    *(tk->inputString+i) = '\0';
+    char *c = (char*) malloc(i);
+    char * buffer = (char*)malloc(i);
+    *c = fgetc(fd);
+    strcpy(buffer,c);
+    while((*c=fgetc(fd)) != EOF){
+        i++; 
+        buffer = (char*)realloc(buffer,i);
+        strcat(buffer,c);    
+    } 
+    buffer = (char*)realloc(buffer,i+1);
+    strcat(buffer,"\0");
+    tk->inputString = buffer;
+    free(c);
+    return tk;
 }
 
 /*
