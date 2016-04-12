@@ -26,8 +26,13 @@ void dirHandler(char * path, SortedIndexPtr index)
     struct dirent *temp = readdir(currentDir);
     while(temp != NULL)
     {
-        if(temp->d_type == DT_DIR)
+        if( !strcmp(temp->d_name,".") || !strcmp(temp->d_name,".."))
         {
+            //Do nothing
+        }
+        else if(temp->d_type == DT_DIR)
+        {
+            strcat(path,"/");
             strcat(path,temp->d_name);
             dirHandler(path,index);
         }
@@ -39,17 +44,15 @@ void dirHandler(char * path, SortedIndexPtr index)
         {
             printf("error\n");
         }
-
         temp = readdir(currentDir);
     }
-    closedir(currentDir);
 }
 
 void fileHandler(char * path, char * filename, SortedIndexPtr index)
 {
-    printf("File found: %s/%s\n",path,filename);
     char * filePath = (char*)calloc(1,strlen(path)+1);
     strcpy(filePath,path);
+    strcat(filePath,"/");
     strcat(filePath,filename);
     FILE * fd = fopen(filePath,"r");
     if(fd == NULL)
@@ -61,15 +64,20 @@ void fileHandler(char * path, char * filename, SortedIndexPtr index)
     char *token = TKGetNextToken(tk);
     while(token != NULL)
     {
-        token = TKGetNextToken(tk);
         SIInsert(index,token,filename);
+        token = TKGetNextToken(tk);
     }
+    fclose(fd);
+    TKDestroy(tk);
 }
 
 int main(int argc, char ** argv)
 {   
-    SortedListIndex index = SICreate(compare,destroy);
+    SortedIndexPtr index = SICreate(compare,destroy);
     dirHandler(argv[2],index);
     SIPrintList(index);
+
+    FILE * fd = fopen(argv[1],"w");
+    SIPrintFile(fd,index);
     return 0;
 }

@@ -114,7 +114,6 @@ void SIDestroy(SortedIndexPtr list)
 int SIInsert(SortedIndexPtr list, void *word, void *file)
 {
     //initialize the new node
-    printf("Allocating...\n"); //tag
     ListNodePtr newNode = (ListNodePtr)malloc(sizeof(ListNodePtr));
     newNode->occurences = 0;
     newNode->data = NULL;
@@ -127,7 +126,6 @@ int SIInsert(SortedIndexPtr list, void *word, void *file)
     //Check if list is empty:
     if(currentNode == NULL)
     { 
-        printf("Inserting first node...\n"); //tag
         newNode->data = word;
         list->head = newNode;
 
@@ -139,14 +137,12 @@ int SIInsert(SortedIndexPtr list, void *word, void *file)
         return 1;
     }
 
-    printf("Comparing...\n"); //tag
     int compareValue = list->compare(currentNode->data,word);
     
     //Check if newNode belongs in front of list
     if(compareValue > 0)
     {
 
-        printf("Inserting at beginning...\n"); //tag
         newNode->next = list->head;
         list->head = newNode; 
 
@@ -159,12 +155,9 @@ int SIInsert(SortedIndexPtr list, void *word, void *file)
     }
 
     //Check if newNode belongs in middle of list
-    printf("searching list for word...\n"); //tag
     while(currentNode != NULL)
     {
         compareValue = list->compare(currentNode->data,word);
-        printf("currentNode->data: %s\n",currentNode->data); //tag
-        printf("compareValue: %d\n",compareValue); //tag
         if(compareValue < 0)
         {
             prevNode = currentNode;
@@ -172,14 +165,12 @@ int SIInsert(SortedIndexPtr list, void *word, void *file)
         }
         else if(compareValue == 0)
         {
-            printf("found word searching records...\n"); //tag
             prevNode = currentNode;
             currentNode = currentNode->files;
             
             compareValue = list->compare(currentNode->data,file);
             if(compareValue > 0)
             {
-                printf("Inserting record at beginning...\n"); //tag
                 prevNode->files = newNode;
                 newNode->next = currentNode;
                 
@@ -197,13 +188,11 @@ int SIInsert(SortedIndexPtr list, void *word, void *file)
                 }
                 else if(compareValue == 0)
                 {
-                    printf("found record adding occurence...\n"); //tag
                     currentNode->occurences++;
                     return 1;
                 }
                 else if(compareValue > 0)
                 {
-                    printf("Inserting record in middle...\n"); //tag
                     prevNode->next = newNode;
                     newNode->next = currentNode;
                     
@@ -212,8 +201,7 @@ int SIInsert(SortedIndexPtr list, void *word, void *file)
                     return 1;
                 }
             }
-            printf("adding to end of record list...\n"); //tag
-            currentNode->next = newNode;
+            prevNode->next = newNode;
             newNode->occurences = 1;
             newNode->data = file;
             return 1;
@@ -221,7 +209,6 @@ int SIInsert(SortedIndexPtr list, void *word, void *file)
         }
         else if(compareValue > 0)
         {
-            printf("Inserting word in middle...\n"); //tag
             prevNode->next = newNode;
             newNode->next = currentNode;
 
@@ -235,7 +222,6 @@ int SIInsert(SortedIndexPtr list, void *word, void *file)
     }
 
     //newNode belongs at end of list
-    printf("Adding word to end of list...\n"); //tag
     prevNode->next = newNode;
 
     newNode->data = word;
@@ -268,4 +254,27 @@ void SIPrintList(SortedIndexPtr list)
     }
     printf("]}\n\n");
     return;
+}
+
+void SIPrintFile(FILE * fd, SortedIndexPtr list)
+{
+    ListNodePtr wordNode = list->head;
+    ListNodePtr fileNode = wordNode->files;
+
+    fprintf(fd,"\n{\"list\":[\n");
+    while(wordNode != NULL)
+    {
+        fileNode = wordNode->files;
+        fprintf(fd,"\t{\"%s\":[\n",wordNode->data);
+        while(fileNode != NULL)
+        {
+            fprintf(fd,"\t\t{\"%s\":%d}\n",fileNode->data,fileNode->occurences);
+            fileNode = fileNode->next;
+        }
+        fprintf(fd,"\t]}\n");
+        wordNode = wordNode->next;
+    }
+    fprintf(fd,"]}\n\n");
+    return;
+
 }

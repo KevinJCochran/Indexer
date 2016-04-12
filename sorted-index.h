@@ -105,5 +105,5 @@ int SIInsert(SortedIndexPtr list, void *word, void *file);
  */
 
 void SIPrintList(SortedIndexPtr list);
-
+void SIPrintFile(FILE * fd, SortedIndexPtr index);
 #endif
