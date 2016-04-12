@@ -1,7 +1,7 @@
-all: test
+all: index
 
-test: test.c libindexer.a
-	gcc -o test test.c libindexer.a
+index: index.c libindexer.a
+	gcc -o index index.c libindexer.a
 
 libindexer.a: sorted-index.o index-tokenizer.o
 	ar r libindexer.a sorted-index.o index-tokenizer.o
@@ -14,4 +14,4 @@ index-tokenizer.o: index-tokenizer.c index-tokenizer.h
 
 clean:
 	rm *.o 
-	rm ./test
+	rm ./index
